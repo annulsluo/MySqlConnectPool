@@ -18,16 +18,21 @@ class CMySqlConnectPool: public taf::TC_Singleton< CMySqlConnectPool,  CreateSta
         class CMySqlConnectItem: public TC_Mysql 
         {
             public:
-                CMySqlConnectItem( const TC_DBConf & dbConf ): TC_Mysql( dbConf ), _bUsed( false ){};
+                CMySqlConnectItem( const TC_DBConf & dbConf );
                 ~CMySqlConnectItem();
+                friend class CMySqlConnectPool;
+
+            private:
                 // 销毁单个数据库链接
                 void DestoryConnectItem();          
 
                 // 回收数据库链接
-                void ReleaseConnectItem();          
+                void RecoverConnectItem();          
+
+            public:
 
                 bool _bUsed;
-
+                int _nItemId;
                 TC_Mysql _mysql;
         };
 
@@ -44,18 +49,26 @@ class CMySqlConnectPool: public taf::TC_Singleton< CMySqlConnectPool,  CreateSta
         CMySqlConnectItem * GetMysqlConnect();    
 
         // 获取db的链接数
-        int Size();                               
+        size_t Size();                               
 
         //销毁数据库连接池
         void DestoryConnPool();                                              
+        
+        // 回收链接
+        void RecoverConnect( CMySqlConnectItem * pMySqlItem );
 
-        void ReleaseConnect( CMySqlConnectItem * pMySqlItem );
+        void DestoryConnect( CMySqlConnectItem * pMySqlItem );
+
+        // TODO
+        // 开启线程进行管理
+        
 
         
     private:
         vector< CMySqlConnectItem * > _vecConnPool;
         int _nCurrSize;
         int _nMaxSize;
+        int _nMinSize;
         pthread_mutex_t _lock;                                                // 线程锁
 
  };
