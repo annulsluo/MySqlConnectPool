@@ -24,7 +24,7 @@ void CMySqlConnectPoolFactory< T >::Init( const TC_DBConf & dbConf, int nSize, T
     pthread_mutex_lock( &_lock);
     try
     { 
-        _nMaxSize = nSize;
+        _nMaxSize += nSize;
         while( nSize -- )
         {
             CMySqlConnectItem * pItem = new CMySqlConnectItem( dbConf );
@@ -142,7 +142,6 @@ void CMySqlConnectPoolFactory<T>::RecoverConnect( CMySqlConnectItem * pMysqlItem
     if( pMysqlItem != NULL && pMysqlItem->_bUsed )
     {
         pMysqlItem->RecoverConnectItem();     
-        _mapConnPool[Index].push_back( pMysqlItem );
         _nCurrSize ++;
     }
 
